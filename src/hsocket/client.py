@@ -1,26 +1,34 @@
 # -*- coding: utf-8 -*-
 from typing import Optional
 import threading
-from abc import abstractmethod
+from enum import Enum, auto
 from .socket import HSocketTcp, HSocketUdp, ClientTcpSocket, ClientUdpSocket
 from .message import Header, Message
 
 
-class HSynTcpClient:
-    """
-    TCP / Synchronous Mode: 
-    The client send a request and get the response in the same thread.
-    """
-    def __init__(self, addr):
-        self.server_addr = addr
+class ClientMode(Enum):
+    SYNCHRONOUS = auto()  # The client send a request and get the response in the same thread.
+    ASYNCHRONOUS = auto()  # The client send and receive in two threads.
+
+
+class HTcpClient:
+    def __init__(self,  mode: ClientMode = ClientMode.SYNCHRONOUS):
         self.__tcp_socket: "HSocketTcp" = ClientTcpSocket()
         self.__tcp_socket.setblocking(True)
+        self.__mode = mode
+        if self.__mode is ClientMode.ASYNCHRONOUS:
+            self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
+
+    def _socket(self) -> "HSocketTcp":
+        return self.__tcp_socket
 
     def settimeout(self, timeout):
         self.__tcp_socket.settimeout(timeout)
 
-    def connect(self):
-        self.__tcp_socket.connect(self.server_addr)
+    def connect(self, addr):
+        self.__tcp_socket.connect(addr)
+        if self.__mode is ClientMode.ASYNCHRONOUS:
+            self.__message_thread.start()
 
     def close(self):
         self.__tcp_socket.close()
@@ -32,12 +40,17 @@ class HSynTcpClient:
         try:
             return self.__tcp_socket.sendMsg(msg)
         except ConnectionResetError:
-            print("connection reset")
-            self._onDisconnected()
-            self.close()
+            if self.__mode is ClientMode.ASYNCHRONOUS:
+                self.__message_thread.join()  # make sure that '_onDisconnected' only runs once
+            if (not self.isclosed()):
+                print("connection reset")
+                self._onDisconnected()
+                self.close()
             return False
 
     def request(self, msg: "Message") -> Optional["Message"]:
+        if self.__mode is ClientMode.ASYNCHRONOUS:
+            raise RuntimeError("'request' is not available in ASYNCHRONOUS mode. Please use 'send' instead")
         if (self.send(msg)):
             try:
                 response = self.__tcp_socket.recvMsg()
@@ -52,48 +65,8 @@ class HSynTcpClient:
                 return response
         return None
 
-    def _onDisconnected(self):
-        pass
-
-
-class HAsynTcpClient:
-    """
-    TCP / Asynchronous Mode: 
-    The client send and receive in two threads.
-    """
-    def __init__(self, addr):
-        self.server_addr = addr
-        self.__tcp_socket: "HSocketTcp" = ClientTcpSocket()
-        self.__tcp_socket.setblocking(True)
-        self.__running = False
-        self.__message_thread = threading.Thread(target=self.__run, daemon=True)
-
-    def connect(self):
-        self.__tcp_socket.connect(self.server_addr)
-        self.__running = True
-        self.__message_thread.start()
-
-    def close(self):
-        self.__running = False
-        self.__tcp_socket.close()
-
-    def isclosed(self) -> bool:
-        return self.__tcp_socket.fileno() == -1
-
-    def send(self, msg: "Message") -> bool:
-        try:
-            return self.__tcp_socket.sendMsg(msg)
-        except ConnectionResetError:
-            self.__message_thread.join()  # make sure that '_onDisconnected' only run once
-            if (not self.isclosed()):
-                print("connection reset")
-                self._onDisconnected()
-                self.close()
-            return False
-
-    def __run(self):
-        self.c=0
-        while self.__running and not self.isclosed():
+    def __recv_handle(self):
+        while not self.isclosed():
             try:
                 msg = self.__tcp_socket.recvMsg()
             except TimeoutError:
@@ -106,7 +79,6 @@ class HAsynTcpClient:
             else:
                 self._messageHandle(msg)
 
-    @abstractmethod
     def _messageHandle(self, msg: "Message"):
         ...
 
@@ -114,46 +86,22 @@ class HAsynTcpClient:
         pass
 
 
-class HSynUdpClient:
-    """
-    UDP / Synchronous Mode: 
-    The client send a request and get the response in the same thread.
-    """
-    def __init__(self, addr):
-        self.server_addr = addr
+class HUdpClient:
+    def __init__(self, addr, mode: ClientMode = ClientMode.SYNCHRONOUS):
         self.__udp_socket: "HSocketUdp" = ClientUdpSocket()
         self.__udp_socket.setblocking(True)
+        self.__mode = mode
+        self.server_addr = addr
+        if self.__mode is ClientMode.ASYNCHRONOUS:
+            self.__running = False
+            self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
     def settimeout(self, timeout):
         self.__udp_socket.settimeout(timeout)
 
     def close(self):
-        self.__udp_socket.close()
-
-    def request(self, msg: "Message") -> Optional["Message"]:
-        try:
-            self.__udp_socket.sendMsg(msg, self.server_addr)
-            response, addr = self.__udp_socket.recvMsg()
-        except TimeoutError:
-            return None
-        else:
-            return response
-
-
-class HAsynUdpClient:
-    """
-    UDP / Asynchronous Mode: 
-    The client send and receive in two threads.
-    """
-    def __init__(self, addr):
-        self.server_addr = addr
-        self.__udp_socket: "HSocketUdp" = ClientUdpSocket()
-        self.__udp_socket.setblocking(True)
-        self.__running = False
-        self.__message_thread = threading.Thread(target=self.__run, daemon=True)
-
-    def close(self):
-        self.__running = False
+        if self.__mode is ClientMode.ASYNCHRONOUS:
+            self.__running = False
         self.__udp_socket.close()
 
     def isclosed(self) -> bool:
@@ -163,12 +111,23 @@ class HAsynUdpClient:
         ret = self.__udp_socket.sendMsg(msg, self.server_addr)
         # recvMsg before sendMsg will cause WinError10022.
         # So start the message thread after the first call of send.
-        if not self.__running:
+        if self.__mode is ClientMode.ASYNCHRONOUS and not self.__running:
             self.__running = True
             self.__message_thread.start()
         return ret
 
-    def __run(self):
+    def request(self, msg: "Message") -> Optional["Message"]:
+        if self.__mode is ClientMode.ASYNCHRONOUS:
+            raise RuntimeError("'request' is not available in ASYNCHRONOUS mode. Please use 'send' instead")
+        try:
+            self.__udp_socket.sendMsg(msg, self.server_addr)
+            response, addr = self.__udp_socket.recvMsg()
+        except TimeoutError:
+            return None
+        else:
+            return response
+
+    def __recv_handle(self):
         while self.__running:
             try:
                 msg, addr = self.__udp_socket.recvMsg()
@@ -179,6 +138,5 @@ class HAsynUdpClient:
             else:
                 self._messageHandle(msg)
 
-    @abstractmethod
     def _messageHandle(self, msg: "Message"):
         ...

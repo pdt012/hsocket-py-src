@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append("..")
-from src.hsocket.client import HAsynTcpClient
+from src.hsocket.client import HTcpClient, ClientMode
 from src.hsocket.socket import Message
 from traceback import print_exc
 
 
-class AsynTcpClientApp(HAsynTcpClient):
-    def __init__(self, addr):
-        super().__init__(addr)
+class AsynTcpClientApp(HTcpClient):
+    def __init__(self):
+        super().__init__(ClientMode.ASYNCHRONOUS)
 
     def _messageHandle(self, msg: "Message"):
         print(msg)
@@ -18,8 +18,8 @@ class AsynTcpClientApp(HAsynTcpClient):
 
 
 if __name__ == '__main__':
-    client = AsynTcpClientApp(("127.0.0.1", 40000))
-    client.connect()
+    client = AsynTcpClientApp()
+    client.connect(("127.0.0.1", 40000))
     print("start")
     try:
         while 1:

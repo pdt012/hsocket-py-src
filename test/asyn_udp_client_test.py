@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append("..")
-from src.hsocket.client import HAsynUdpClient
+from src.hsocket.client import HUdpClient, ClientMode
 from src.hsocket.socket import Message
 from traceback import print_exc
 
 
-class AsynUdpClientApp(HAsynUdpClient):
+class AsynUdpClientApp(HUdpClient):
     def __init__(self, addr):
-        super().__init__(addr)
+        super().__init__(addr, ClientMode.ASYNCHRONOUS)
 
     def _messageHandle(self, msg: "Message"):
         print('msg: ',msg)

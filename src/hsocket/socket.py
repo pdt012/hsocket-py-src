@@ -5,10 +5,8 @@ import os
 from .message import Header, Message, MessageConfig
 
 
-BUFFER_SIZE = 1024
-
-
 class SocketConfig:
+    BUFFER_SIZE = 1024
     DEFAULT_DOWNLOAD_PATH = "download/"
 
 
@@ -34,7 +32,7 @@ class HSocketTcp(socket.socket):
         if header:
             size = header.length
             while len(data) < size:  # 未接收完
-                recv_size = min(size - len(data), BUFFER_SIZE)
+                recv_size = min(size - len(data), SocketConfig.BUFFER_SIZE)
                 recv_data = self.recv(recv_size)
                 data += recv_data
             if data:
@@ -83,7 +81,7 @@ class HSocketTcp(socket.socket):
                 with open(down_path, 'wb') as fp:
                     # TODO 异常处理
                     while received_size < filesize:
-                        recv_size = min(filesize - received_size, BUFFER_SIZE)
+                        recv_size = min(filesize - received_size, SocketConfig.BUFFER_SIZE)
                         data = self.recv(recv_size)
                         fp.write(data)
                         received_size += len(data)

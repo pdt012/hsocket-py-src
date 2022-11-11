@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append("..")
-from src.hsocket.client import HSynUdpClient
+from src.hsocket.client import HUdpClient, ClientMode
 from src.hsocket.socket import Message
 from traceback import print_exc
 
 
-class SynUdpClientApp(HSynUdpClient):
+class SynUdpClientApp(HUdpClient):
     def __init__(self, addr):
-        super().__init__(addr)
+        super().__init__(addr, ClientMode.SYNCHRONOUS)
 
 
 if __name__ == '__main__':

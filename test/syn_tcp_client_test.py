@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append("..")
-from src.hsocket.client import HSynTcpClient
+from src.hsocket.client import HTcpClient, ClientMode
 from src.hsocket.socket import Message
 from traceback import print_exc
 
 
-class SynTcpClientApp(HSynTcpClient):
-    def __init__(self, addr):
-        super().__init__(addr)
+class SynTcpClientApp(HTcpClient):
+    def __init__(self):
+        super().__init__(ClientMode.SYNCHRONOUS)
 
     def _onDisconnected(self):
         return super()._onDisconnected()
 
 
 if __name__ == '__main__':
-    client = SynTcpClientApp(("127.0.0.1", 40000))
-    client.connect()
+    client = SynTcpClientApp()
+    client.connect(("127.0.0.1", 40000))
     print("start")
     try:
         while 1:
