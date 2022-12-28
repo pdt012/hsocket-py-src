@@ -108,6 +108,30 @@ public:
 		return this->__json;
 	}
 
+	int getInt(const std::string &key) {
+		int value;
+		__json->Get(key, value);
+		return value;
+	}
+
+	float getFloat(const std::string &key) {
+		float value;
+		__json->Get(key, value);
+		return value;
+	}
+
+	bool getBool(const std::string &key) {
+		bool value;
+		__json->Get(key, value);
+		return value;
+	}
+
+	std::string getStr(const std::string &key) {
+		std::string value;
+		__json->Get(key, value);
+		return value;
+	}
+
 	std::string toString() {
 		std::string cont;
 		if (__contenttype == ContentType::HEADERONLY)
