@@ -92,6 +92,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -153,14 +154,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="HSocket.h" />
-    <ClInclude Include="HTcpSocket.h" />
-    <ClInclude Include="HUdpSocket.h" />
+    <ClInclude Include="include\framework.h" />
+    <ClInclude Include="include\HSocket.h" />
+    <ClInclude Include="include\HTcpSocket.h" />
+    <ClInclude Include="include\HUdpSocket.h" />
+    <ClInclude Include="include\IPv4Address.h" />
+    <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\util.h" />
     <ClInclude Include="Message.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="IPv4Address.h" />
-    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HTcpSocket.cpp" />
@@ -173,7 +174,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="IPv4Address.cpp" />
-    <ClCompile Include="src.cpp" />
+    <ClCompile Include="hsocket.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

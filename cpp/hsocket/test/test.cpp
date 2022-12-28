@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include "../src/HTcpSocket.h"
+#include "../hsocket/include/HTcpSocket.h"
 
 #ifdef _DEBUG
 #pragma comment(lib,"../Debug/hsocket.lib")

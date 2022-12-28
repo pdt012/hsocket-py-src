@@ -1,4 +1,4 @@
-﻿// src.cpp : 定义静态库的函数。
+﻿// hsocket.cpp : 定义静态库的函数。
 //
 
 #include "pch.h"
