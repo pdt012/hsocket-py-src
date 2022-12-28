@@ -159,9 +159,9 @@
     <ClInclude Include="include\HTcpSocket.h" />
     <ClInclude Include="include\HUdpSocket.h" />
     <ClInclude Include="include\IPv4Address.h" />
+    <ClInclude Include="include\Message.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\util.h" />
-    <ClInclude Include="Message.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HTcpSocket.cpp" />
