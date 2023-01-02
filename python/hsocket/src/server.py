@@ -6,9 +6,10 @@ from .socket import *
 
 
 class HServerSelector:
-    def __init__(self, messageHandle: Callable, onDisconnected: Callable):
+    def __init__(self, messageHandle: Callable, onConnected: Callable, onDisconnected: Callable):
         self.messageHandle = messageHandle
         self.onDisconnected = onDisconnected
+        self.onConnected = onConnected
         self.server_socket: "HSocketTcp" = None
         self.msgs: Dict["HSocketTcp", "Message"] = {}
 
@@ -38,6 +39,7 @@ class HServerSelector:
         conn.setblocking(False)
         self.msgs[conn] = None
         self.selector.register(conn, selectors.EVENT_READ, self.callback_read)
+        self.onConnected(conn, addr)
 
     def callback_read(self, conn: "HSocketTcp"):
         addr = conn.getpeername()
@@ -63,14 +65,13 @@ class HServerSelector:
             self.msgs[conn] = None
         self.selector.modify(conn, selectors.EVENT_READ, self.callback_read)
 
-
     def remove(self, conn: "HSocketTcp"):
         self.selector.unregister(conn)
 
 
 class HTcpServer:
     def __init__(self):
-        self.__selector = HServerSelector(self._messageHandle, self._onDisconnected)
+        self.__selector = HServerSelector(self._messageHandle, self._onConnected, self._onDisconnected)
 
     def start(self, addr):
         self.__selector.start(addr)
@@ -81,6 +82,9 @@ class HTcpServer:
     @abstractmethod
     def _messageHandle(self, conn: "HSocketTcp", msg: "Message"):
         ...
+
+    def _onConnected(self, conn: "HSocketTcp", addr):
+        pass
 
     def _onDisconnected(self, addr):
         pass
