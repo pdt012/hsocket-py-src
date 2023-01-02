@@ -3,7 +3,7 @@ from typing import Optional
 import threading
 import socket
 from enum import Enum, auto
-from .socket import HSocketTcp, HSocketUdp
+from .socket import HTcpSocket, HUdpSocket
 from .message import Header, Message
 
 
@@ -14,13 +14,13 @@ class ClientMode(Enum):
 
 class HTcpClient:
     def __init__(self, mode: ClientMode = ClientMode.SYNCHRONOUS):
-        self.__tcp_socket: "HSocketTcp" = HSocketTcp()
+        self.__tcp_socket: "HTcpSocket" = HTcpSocket()
         self.__tcp_socket.setblocking(True)
         self.__mode = mode
         if self.__mode is ClientMode.ASYNCHRONOUS:
             self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
-    def _socket(self) -> "HSocketTcp":
+    def _socket(self) -> "HTcpSocket":
         return self.__tcp_socket
 
     def settimeout(self, timeout):
@@ -89,7 +89,7 @@ class HTcpClient:
 
 class HUdpClient:
     def __init__(self, addr, mode: ClientMode = ClientMode.SYNCHRONOUS):
-        self.__udp_socket: "HSocketUdp" = HSocketUdp()
+        self.__udp_socket: "HUdpSocket" = HUdpSocket()
         self.__udp_socket.setblocking(True)
         self.__mode = mode
         self._peer_addr = addr
@@ -97,7 +97,7 @@ class HUdpClient:
             self.__running = False
             self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
-    def _socket(self) -> "HSocketUdp":
+    def _socket(self) -> "HUdpSocket":
         return self.__udp_socket
 
     def settimeout(self, timeout):

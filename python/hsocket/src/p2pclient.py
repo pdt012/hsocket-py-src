@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 import socket
 import threading
-from .socket import HSocketTcp, HSocketUdp
+from .socket import HTcpSocket, HUdpSocket
 from .message import Header, Message
 
 
 class HTcpP2PClient:
     def __init__(self):
-        self.__tcp_socket: "HSocketTcp" = None
+        self.__tcp_socket: "HTcpSocket" = None
         self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
-    def _socket(self) -> "HSocketTcp":
+    def _socket(self) -> "HTcpSocket":
         return self.__tcp_socket
 
     def bind(self, addr):
-        self.__tcp_socket = HSocketTcp()
+        self.__tcp_socket = HTcpSocket()
         self.__tcp_socket.setblocking(True)
         self.__tcp_socket.bind(addr)
         self.__tcp_socket.listen(1)
@@ -27,7 +27,7 @@ class HTcpP2PClient:
         self.__message_thread.start()
 
     def connect(self, addr):
-        self.__tcp_socket = HSocketTcp()
+        self.__tcp_socket = HTcpSocket()
         self.__tcp_socket.setblocking(True)
         self.__tcp_socket.connect(addr)
         print("connected: {}".format(addr))
@@ -79,13 +79,13 @@ class HTcpP2PClient:
 
 class HUdpP2PClient():
     def __init__(self):
-        self.__udp_socket: "HSocketUdp" = HSocketUdp()
+        self.__udp_socket: "HUdpSocket" = HUdpSocket()
         self.__udp_socket.setblocking(True)
         self._peer_addr = None
         self.__running = False
         self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
-    def _socket(self) -> "HSocketUdp":
+    def _socket(self) -> "HUdpSocket":
         return self.__udp_socket
 
     def close(self):

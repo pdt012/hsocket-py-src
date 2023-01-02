@@ -10,11 +10,11 @@ class HServerSelector:
         self.messageHandle = messageHandle
         self.onDisconnected = onDisconnected
         self.onConnected = onConnected
-        self.server_socket: "HSocketTcp" = None
-        self.msgs: Dict["HSocketTcp", "Message"] = {}
+        self.server_socket: "HTcpSocket" = None
+        self.msgs: Dict["HTcpSocket", "Message"] = {}
 
     def start(self, addr, backlog=10):
-        self.server_socket = HSocketTcp()
+        self.server_socket = HTcpSocket()
         self.server_socket.bind(addr)
         self.server_socket.setblocking(False)
         self.server_socket.listen(backlog)
@@ -33,7 +33,7 @@ class HServerSelector:
         # TODO: disconnect the remaining sockets before stop
         self.selector.close()
 
-    def callback_accept(self, server_socket: "HSocketTcp"):
+    def callback_accept(self, server_socket: "HTcpSocket"):
         conn, addr = server_socket.accept()
         print("connected: {}".format(addr))
         conn.setblocking(False)
@@ -41,7 +41,7 @@ class HServerSelector:
         self.selector.register(conn, selectors.EVENT_READ, self.callback_read)
         self.onConnected(conn, addr)
 
-    def callback_read(self, conn: "HSocketTcp"):
+    def callback_read(self, conn: "HTcpSocket"):
         addr = conn.getpeername()
         try:
             msg = conn.recvMsg()  # receive msg
@@ -58,14 +58,14 @@ class HServerSelector:
             print("connection closed: {}".format(addr))
             self.onDisconnected(addr)  # disconnect callback
 
-    def callback_write(self, conn: "HSocketTcp"):
+    def callback_write(self, conn: "HTcpSocket"):
         msg = self.msgs[conn]
         if msg:
             self.messageHandle(conn, msg)
             self.msgs[conn] = None
         self.selector.modify(conn, selectors.EVENT_READ, self.callback_read)
 
-    def remove(self, conn: "HSocketTcp"):
+    def remove(self, conn: "HTcpSocket"):
         self.selector.unregister(conn)
 
 
@@ -80,10 +80,10 @@ class HTcpServer:
         self.__selector.stop()
 
     @abstractmethod
-    def _messageHandle(self, conn: "HSocketTcp", msg: "Message"):
+    def _messageHandle(self, conn: "HTcpSocket", msg: "Message"):
         ...
 
-    def _onConnected(self, conn: "HSocketTcp", addr):
+    def _onConnected(self, conn: "HTcpSocket", addr):
         pass
 
     def _onDisconnected(self, addr):
@@ -92,10 +92,10 @@ class HTcpServer:
 
 class HUdpServer:
     def __init__(self):
-        self.__udp_socket: "HSocketUdp" = None
+        self.__udp_socket: "HUdpSocket" = None
 
     def start(self, addr):
-        self.__udp_socket = HSocketUdp()
+        self.__udp_socket = HUdpSocket()
         self.__udp_socket.bind(addr)
         while True:
             if self.__udp_socket.fileno == -1:

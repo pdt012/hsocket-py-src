@@ -10,13 +10,13 @@ class SocketConfig:
     DEFAULT_DOWNLOAD_PATH = "download/"
 
 
-class HSocketTcp(socket.socket):
+class HTcpSocket(socket.socket):
     def __init__(self, family=socket.AF_INET, type_=socket.SOCK_STREAM, proto=-1, fileno=None):
         super().__init__(family, type_, proto, fileno)
     
-    def accept(self) -> Tuple["HSocketTcp", Tuple[str, int]]:
+    def accept(self) -> Tuple["HTcpSocket", Tuple[str, int]]:
         fd, addr = self._accept()
-        sock = HSocketTcp(self.family, self.type, self.proto, fileno=fd)
+        sock = HTcpSocket(self.family, self.type, self.proto, fileno=fd)
         if self.gettimeout():
             sock.setblocking(True)
         return sock, addr
@@ -117,7 +117,7 @@ class HSocketTcp(socket.socket):
         return filepaths, fileAmount
 
 
-class HSocketUdp(socket.socket):
+class HUdpSocket(socket.socket):
     def __init__(self):
         super().__init__(socket.AF_INET, socket.SOCK_DGRAM)
 

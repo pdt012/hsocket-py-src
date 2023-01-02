@@ -2,12 +2,12 @@
 import sys
 sys.path.append("..")
 from src.server import HTcpServer
-from src.socket import HSocketTcp, Message
+from src.socket import HTcpSocket, Message
 from traceback import print_exc
 
 
 class TcpServerApp(HTcpServer):
-    def _messageHandle(self, conn: "HSocketTcp", msg: "Message"):
+    def _messageHandle(self, conn: "HTcpSocket", msg: "Message"):
         addr = conn.getpeername()
         match msg.opcode():
             case 0:

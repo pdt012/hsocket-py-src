@@ -2,7 +2,7 @@
 import sys
 sys.path.append("..")
 from src.server import HUdpServer
-from src.socket import HSocketUdp, Message
+from src.socket import HUdpSocket, Message
 from traceback import print_exc
 
 
