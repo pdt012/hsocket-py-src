@@ -11,6 +11,8 @@ namespace SocketConfig {
 class HTcpSocket : public HSocket
 {
 public:
+	HTcpSocket();
+
 	bool sendMsg(Message &msg);
 
 	Message recvMsg();

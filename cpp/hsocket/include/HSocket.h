@@ -22,6 +22,9 @@ public:
 			NULL);
 		return std::string(msgBuf).c_str();
 	}
+	int getErrcode() {
+		return errcode;
+	}
 private:
 	int errcode;
 };
@@ -31,11 +34,11 @@ private:
 class HSocket
 {
 public:
-	HSocket() {
+	HSocket(int af, int type, int protocol) {
 		//创建套接字
 		WSADATA wsaData;
 		int errcode = WSAStartup(MAKEWORD(2, 2), &wsaData);
-		this->handle = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+		this->handle = socket(af, type, protocol);
 	}
 
 	~HSocket() {
@@ -77,24 +80,21 @@ public:
 		return IPv4Address::from_sockaddr(name);
 	}
 
-	bool bind(const char *ip, unsigned short port) {
+	void bind(const char *ip, unsigned short port) {
 		sockaddr_in saddr = v4addr_to_sockaddr(ip, port);
 		int ret = ::bind(handle, (SOCKADDR *)&saddr, sizeof(SOCKADDR));
 		THROW_IF_SOCKET_ERROR(ret);
-		return ret;
 	}
 
-	bool connect(const char *ip, unsigned short port) {
+	void connect(const char *ip, unsigned short port) {
 		sockaddr_in saddr = v4addr_to_sockaddr(ip, port);
 		int ret = ::connect(handle, (SOCKADDR *)&saddr, sizeof(SOCKADDR));
 		THROW_IF_SOCKET_ERROR(ret);
-		return ret;
 	}
 
-	bool listen(SOCKET sock, int backlog) {
+	void listen(SOCKET sock, int backlog) {
 		int ret = ::listen(sock, backlog);
 		THROW_IF_SOCKET_ERROR(ret);
-		return ret;
 	}
 
 	HSocket accept() {

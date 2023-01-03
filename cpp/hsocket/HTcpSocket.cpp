@@ -8,6 +8,11 @@ namespace SocketConfig {
 	int BUFFER_SIZE = 1024;
 }
 
+HTcpSocket::HTcpSocket()
+	: HSocket(PF_INET, SOCK_STREAM, IPPROTO_TCP)
+{
+}
+
 bool HTcpSocket::sendMsg(Message &msg)
 {
 	sendall(msg.toString());
