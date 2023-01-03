@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include "../hsocket/include/HTcpSocket.h"
+#include "../hsocket/include/convert/convert.cpp"
 
 #ifdef _DEBUG
 #pragma comment(lib,"../Debug/hsocket.lib")
@@ -13,13 +14,40 @@ int main()
 		HTcpSocket socket = HTcpSocket();
 		socket.connect("127.0.0.1", 40000);
 		std::cout << "start" << std::endl;
-		neb::CJsonObject json;
-		json.Add("text0", "<0>test message send by c++ client");
-		Message msg = Message::JsonMsg(0, 0, json);
-		socket.sendMsg(msg);
-		Message replyMsg = socket.recvMsg();
-		if (replyMsg.isValid()) {
-			std::cout << replyMsg.toString() << std::endl;
+		while (true) {
+			int code = -1;
+			std::cout << ">>>";
+			std::cin >> code;
+			if (std::cin.fail()) break;
+			switch (code)
+			{
+			case 0: {
+				neb::CJsonObject json;
+				json.Add("text0", "<0>test message send by c++ client");
+				Message msg = Message::JsonMsg(0, 0, json);
+				socket.sendMsg(msg);
+				Message replyMsg = socket.recvMsg();
+				if (replyMsg.isValid()) {
+					std::cout << replyMsg.toString() << std::endl;
+				}}
+			case 100:
+				socket.sendMsg(Message::HeaderOnlyMsg(100));
+				socket.sendFile("testfile/test1.txt", "test1_by_cpp_client.txt");
+			case 101:
+				socket.sendMsg(Message::HeaderOnlyMsg(101));
+				socket.recvFile();
+			case 110: {
+				socket.sendMsg(Message::HeaderOnlyMsg(110));
+				std::vector<std::string> pathlist = { "testfile/test1.txt", "testfile/test2.txt" };
+				std::vector<std::string> namelist = { "test1_by_cpp_client.txt", "test2_by_cpp_client.txt" };
+				socket.sendFiles(pathlist, namelist); }
+			case 111:
+				socket.sendMsg(Message::HeaderOnlyMsg(111));
+				socket.recvFiles();
+			default:
+				break;
+			}
+
 		}
 	}
 	catch (ConnectionError e) {
