@@ -30,7 +30,12 @@ class HServerSelector:
                 callback(key.fileobj)
 
     def stop(self):
-        # TODO: disconnect the remaining sockets before stop
+        fobj_list = []
+        for fd, key in self.selector.get_map().items():
+            fobj_list.append(key.fileobj)
+        for fobj in fobj_list:
+            self.selector.unregister(fobj)
+            fobj.close()
         self.selector.close()
 
     def callback_accept(self, server_socket: "HTcpSocket"):
@@ -78,6 +83,9 @@ class HTcpServer:
 
     def close(self):
         self.__selector.stop()
+
+    def remove(self, conn: "HTcpSocket"):
+        self.__selector.remove(conn)
 
     @abstractmethod
     def _messageHandle(self, conn: "HTcpSocket", msg: "Message"):
