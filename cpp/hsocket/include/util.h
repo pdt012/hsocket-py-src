@@ -21,6 +21,8 @@ namespace fileutil {
 
 	time_t mtime(const char *path);
 
+	bool exists(const wchar_t *wpath);
+
 	size_t size(const wchar_t *wpath);
 
 	time_t ctime(const wchar_t *wpath);

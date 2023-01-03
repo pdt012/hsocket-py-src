@@ -64,6 +64,11 @@ namespace fileutil {
 			return 0;
 	}
 
+	bool exists(const wchar_t *wpath)
+	{
+		return _waccess(wpath, 0) == 0;
+	}
+
 	size_t size(const wchar_t *wpath)
 	{
 		struct _stat st;

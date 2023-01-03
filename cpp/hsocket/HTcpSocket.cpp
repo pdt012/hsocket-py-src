@@ -4,6 +4,8 @@
 #include "./include/convert/convert.h"
 #include <fstream>
 
+#define USE_UNICODE_FILEPATHS
+
 namespace SocketConfig {
 	int BUFFER_SIZE = 1024;
 }
@@ -39,16 +41,28 @@ Message HTcpSocket::recvMsg()
 
 bool HTcpSocket::sendFile(const std::string &path, const std::string &filename)
 {
+#ifdef USE_UNICODE_FILEPATHS
+	std::wstring uniPath;
+	gconvert::utf82uni(path, uniPath);
+	if (!fileutil::exists(uniPath.c_str()))
+		return false;
+	int filesize = fileutil::size(uniPath.c_str());
+#else
 	if (!fileutil::exists(path.c_str()))
 		return false;
 	int filesize = fileutil::size(path.c_str());
+#endif
 	// 文件起始包
 	neb::CJsonObject json;
 	json.Add("filename", filename);
 	json.Add("size", filesize);
 	Message fileHeaderMsg = Message::JsonMsg(1001, 0, json);
 	if (sendMsg(fileHeaderMsg)) {
+#ifdef USE_UNICODE_FILEPATHS
+		std::fstream fp(uniPath, std::ios::binary | std::ios::in);
+#else
 		std::fstream fp(path, std::ios::binary | std::ios::in);
+#endif
 		char *buf = new char[SocketConfig::BUFFER_SIZE];
 		while (!fp.eof()) {
 			fp.read(buf, SocketConfig::BUFFER_SIZE);
@@ -84,7 +98,13 @@ std::string HTcpSocket::recvFile()
 				fileutil::mkdir(SocketConfig::DEFAULT_DOWNLOAD_PATH);
 			std::string downPath = pathutil::join(SocketConfig::DEFAULT_DOWNLOAD_PATH, filename);
 			int totalRecvSize = 0;  // 收到的字节数
+#ifdef USE_UNICODE_FILEPATHS
+			std::wstring uniDownPath;
+			gconvert::utf82uni(downPath, uniDownPath);
+			std::fstream fp(uniDownPath, std::ios::binary | std::ios::out);
+#else
 			std::fstream fp(downPath, std::ios::binary | std::ios::out);
+#endif
 			// todo: 异常处理
 			while (totalRecvSize < size) {
 				int recvSize = min(size - totalRecvSize, SocketConfig::BUFFER_SIZE);
