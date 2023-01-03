@@ -43,7 +43,6 @@ class HTcpSocket(socket.socket):
             return Message()
 
     def sendFile(self, path: str, filename: str):
-        print("send file")
         if not os.path.isfile(path):
             return False
         filesize = os.stat(path).st_size
@@ -68,7 +67,6 @@ class HTcpSocket(socket.socket):
         return False
 
     def recvFile(self) -> str:
-        print("recv file")
         isblocking = self.getblocking()
         self.setblocking(True)  # 避免收不到file_header_msg
         file_header_msg = self.recvMsg()
