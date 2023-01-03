@@ -8,9 +8,6 @@ class ConnectionError : public std::exception
 public:
 	ConnectionError() {
 		errcode = WSAGetLastError();
-	}
-	virtual ~ConnectionError() = default;
-	virtual const char *what() const throw () {
 		char msgBuf[256];
 		::FormatMessageA(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -20,13 +17,18 @@ public:
 			msgBuf,
 			sizeof(msgBuf),
 			NULL);
-		return std::string(msgBuf).c_str();
+		message = std::string(msgBuf);
+	}
+	virtual ~ConnectionError() = default;
+	virtual const char *what() const noexcept {
+		return message.c_str();
 	}
 	int getErrcode() {
 		return errcode;
 	}
 private:
 	int errcode;
+	std::string message;
 };
 
 #define THROW_IF_SOCKET_ERROR(code) if (code == SOCKET_ERROR) throw ConnectionError();
