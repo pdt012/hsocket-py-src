@@ -13,7 +13,7 @@ class HTcpSocket : public HSocket
 public:
 	HTcpSocket();
 
-	bool sendMsg(Message &msg);
+	bool sendMsg(const Message &msg);
 
 	Message recvMsg();
 
@@ -21,7 +21,7 @@ public:
 
 	std::string recvFile();
 
-	int sendFiles(std::vector<std::string> pathlist, std::vector<std::string> namelist);
+	int sendFiles(std::vector<std::string> &pathlist, std::vector<std::string> &namelist);
 
 	std::vector<std::string> recvFiles();
 };

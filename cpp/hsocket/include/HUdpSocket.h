@@ -7,7 +7,7 @@ class HUdpSocket : public HSocket
 public:
 	HUdpSocket();
 
-	bool sendMsg(Message &msg, IPv4Address &addr);
+	bool sendMsg(const Message &msg, const IPv4Address &addr);
 
 	Message recvMsg(IPv4Address *addr);
 };

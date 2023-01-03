@@ -6,7 +6,7 @@ HUdpSocket::HUdpSocket()
 {
 }
 
-bool HUdpSocket::sendMsg(Message &msg, IPv4Address &addr)
+bool HUdpSocket::sendMsg(const Message &msg, const IPv4Address &addr)
 {
 	return sendto(msg.toString(), addr);
 }

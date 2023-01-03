@@ -15,7 +15,7 @@ HTcpSocket::HTcpSocket()
 {
 }
 
-bool HTcpSocket::sendMsg(Message &msg)
+bool HTcpSocket::sendMsg(const Message &msg)
 {
 	sendall(msg.toString());
 	return true;
@@ -124,7 +124,7 @@ std::string HTcpSocket::recvFile()
 	return "";
 }
 
-int HTcpSocket::sendFiles(std::vector<std::string> pathlist, std::vector<std::string> namelist)
+int HTcpSocket::sendFiles(std::vector<std::string> &pathlist, std::vector<std::string> &namelist)
 {
 	if (pathlist.size() != namelist.size())
 		return 0;

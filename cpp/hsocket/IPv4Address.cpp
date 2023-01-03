@@ -3,7 +3,7 @@
 #include <WS2tcpip.h>
 #include <fstream>
 
-sockaddr_in IPv4Address::to_sockaddr_in()
+sockaddr_in IPv4Address::to_sockaddr_in() const
 {
 	return v4addr_to_sockaddr(this->ip, this->port);
 }

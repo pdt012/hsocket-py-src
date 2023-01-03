@@ -132,7 +132,7 @@ public:
 		return value;
 	}
 
-	std::string toString() {
+	std::string toString() const {
 		std::string cont;
 		if (__contenttype == ContentType::HEADERONLY)
 			cont = "";

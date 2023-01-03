@@ -10,7 +10,7 @@ public:
 	IPv4Address() : ip(""), port(0) {};
 	IPv4Address(const std::string &ip, unsigned short port) : ip(ip), port(port) {};
 	/*生成 SOCKADDR 网络地址*/
-	sockaddr_in to_sockaddr_in();
+	sockaddr_in to_sockaddr_in() const;
 	static IPv4Address from_sockaddr(SOCKADDR sockaddr);
 };
 

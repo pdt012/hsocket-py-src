@@ -135,7 +135,7 @@ public:
 		}
 	}
 
-	int sendto(const std::string &data, IPv4Address &addr) {
+	int sendto(const std::string &data, const IPv4Address &addr) {
 		sockaddr_in to = addr.to_sockaddr_in();
 		int ret = ::sendto(handle, data.c_str(), data.size(), NULL, (SOCKADDR *)&to, sizeof(to));
 		THROW_IF_SOCKET_ERROR(ret);
