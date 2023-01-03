@@ -20,7 +20,7 @@ class HTcpClient:
         if self.__mode is ClientMode.ASYNCHRONOUS:
             self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
-    def _socket(self) -> "HTcpSocket":
+    def socket(self) -> "HTcpSocket":
         return self.__tcp_socket
 
     def settimeout(self, timeout):
@@ -97,7 +97,7 @@ class HUdpClient:
             self.__running = False
             self.__message_thread = threading.Thread(target=self.__recv_handle, daemon=True)
 
-    def _socket(self) -> "HUdpSocket":
+    def socket(self) -> "HUdpSocket":
         return self.__udp_socket
 
     def settimeout(self, timeout):

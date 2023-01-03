@@ -102,6 +102,9 @@ class HUdpServer:
     def __init__(self):
         self.__udp_socket: "HUdpSocket" = None
 
+    def socket(self) -> "HUdpSocket":
+        return self.__udp_socket
+
     def start(self, addr):
         self.__udp_socket = HUdpSocket()
         self.__udp_socket.bind(addr)
