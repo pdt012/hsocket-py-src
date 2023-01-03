@@ -43,6 +43,7 @@ class HTcpSocket(socket.socket):
             return Message()
 
     def sendFile(self, path: str, filename: str):
+        print("send file")
         if not os.path.isfile(path):
             return False
         filesize = os.stat(path).st_size
@@ -67,6 +68,7 @@ class HTcpSocket(socket.socket):
         return False
 
     def recvFile(self) -> str:
+        print("recv file")
         isblocking = self.getblocking()
         self.setblocking(True)  # 避免收不到file_header_msg
         file_header_msg = self.recvMsg()
@@ -75,7 +77,7 @@ class HTcpSocket(socket.socket):
             filesize = file_header_msg.get("size")
             if filename and filesize > 0:
                 if not os.path.exists(SocketConfig.DEFAULT_DOWNLOAD_PATH):
-                    os.path.makedirs(SocketConfig.DEFAULT_DOWNLOAD_PATH)
+                    os.makedirs(SocketConfig.DEFAULT_DOWNLOAD_PATH)
                 down_path = os.path.join(SocketConfig.DEFAULT_DOWNLOAD_PATH, filename)
                 received_size = 0
                 with open(down_path, 'wb') as fp:
