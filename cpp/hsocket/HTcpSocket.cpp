@@ -71,7 +71,7 @@ bool HTcpSocket::sendFile(const std::string &path, const std::string &filename)
 		}
 		fp.close();
 		// 文件终止包
-		Message fileEndingMsg = recvMsg();
+		/*Message fileEndingMsg = recvMsg();
 		if (fileEndingMsg.isValid()) {
 			std::string recvFilename;
 			int recvSize;
@@ -79,7 +79,8 @@ bool HTcpSocket::sendFile(const std::string &path, const std::string &filename)
 			fileEndingMsg.json()->Get("size", recvSize);
 			if (filename == recvFilename and filesize == recvSize)
 				return true;
-		}
+		}*/
+		return true;
 	}
 	return false;
 }
@@ -113,12 +114,13 @@ std::string HTcpSocket::recvFile()
 				totalRecvSize += data.size();
 			}
 			// 文件终止包
-			neb::CJsonObject json;
+			/*neb::CJsonObject json;
 			json.Add("filename", filename);
 			json.Add("size", size);
 			Message fileEndingMsg = Message::JsonMsg(1002, 0, json);
 			if (sendMsg(fileEndingMsg))
-				return downPath;
+				return downPath;*/
+			return downPath;
 		}
 	}
 	return "";

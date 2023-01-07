@@ -30,20 +30,25 @@ int main()
 				if (replyMsg.isValid()) {
 					std::cout << replyMsg.toString() << std::endl;
 				}}
+				  break;
 			case 100:
 				socket.sendMsg(Message::HeaderOnlyMsg(100));
 				socket.sendFile("testfile/test1.txt", "test1_by_cpp_client.txt");
+				break;
 			case 101:
 				socket.sendMsg(Message::HeaderOnlyMsg(101));
 				socket.recvFile();
+				break;
 			case 110: {
 				socket.sendMsg(Message::HeaderOnlyMsg(110));
 				std::vector<std::string> pathlist = { "testfile/test1.txt", "testfile/test2.txt" };
 				std::vector<std::string> namelist = { "test1_by_cpp_client.txt", "test2_by_cpp_client.txt" };
 				socket.sendFiles(pathlist, namelist); }
+					break;
 			case 111:
 				socket.sendMsg(Message::HeaderOnlyMsg(111));
 				socket.recvFiles();
+				break;
 			default:
 				break;
 			}

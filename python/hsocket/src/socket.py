@@ -47,8 +47,6 @@ class HTcpSocket(socket.socket):
             return False
         filesize = os.stat(path).st_size
         file_header_msg = Message.JsonMsg(1001, 0, {"filename": filename, "size": filesize})
-        isblocking = self.getblocking()
-        self.setblocking(True)  # 避免收不到file_ending_msg
         if self.sendMsg(file_header_msg):
             with open(path, 'rb') as fp:
                 while True:
@@ -56,14 +54,16 @@ class HTcpSocket(socket.socket):
                     if not data:
                         break
                     self.sendall(data)
-            file_ending_msg = self.recvMsg()
-            if file_ending_msg.isValid():
-                received_filename = file_ending_msg.get("filename")
-                received_filesize = file_ending_msg.get("size")
-                if filename == received_filename and filesize == received_filesize:
-                    self.setblocking(isblocking)
-                    return True
-        self.setblocking(isblocking)
+            # isblocking = self.getblocking()
+            # self.setblocking(True)  # 避免收不到file_ending_msg
+            # file_ending_msg = self.recvMsg()
+            # self.setblocking(isblocking)
+            # if file_ending_msg.isValid():
+            #     received_filename = file_ending_msg.get("filename")
+            #     received_filesize = file_ending_msg.get("size")
+            #     if filename == received_filename and filesize == received_filesize:
+            #         return True
+            return True
         return False
 
     def recvFile(self) -> str:
@@ -85,10 +85,11 @@ class HTcpSocket(socket.socket):
                         data = self.recv(recv_size)
                         fp.write(data)
                         received_size += len(data)
-                file_ending_msg = Message.JsonMsg(1002, 0, {"filename": filename, "size": received_size})
-                if self.sendMsg(file_ending_msg):
-                    self.setblocking(isblocking)
-                    return down_path
+                # file_ending_msg = Message.JsonMsg(1002, 0, {"filename": filename, "size": received_size})
+                # if self.sendMsg(file_ending_msg):
+                #     return down_path
+                self.setblocking(isblocking)
+                return down_path
         self.setblocking(isblocking)
         return ""
 
