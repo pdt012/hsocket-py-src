@@ -146,7 +146,7 @@ public:
 
 	std::string recvfrom(IPv4Address *addr) {
 		SOCKADDR from;
-		int fromlen = 0;
+		int fromlen = sizeof(SOCKADDR);
 		char *buf = new char[65535];
 		int ret = ::recvfrom(handle, buf, 65535, NULL, &from, &fromlen);
 		if (ret == SOCKET_ERROR) {
