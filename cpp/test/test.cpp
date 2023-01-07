@@ -3,7 +3,7 @@
 #include "../hsocket/include/convert/convert.cpp"
 
 #ifdef _DEBUG
-#pragma comment(lib,"../Debug/hsocket.lib")
+#pragma comment(lib,"../Debug/hsocketd.lib")
 #else
 #pragma comment(lib,"..\\Release\\hsocket.lib")
 #endif
