@@ -3,10 +3,19 @@
 #include "../hsocket/include/convert/convert.cpp"
 
 #ifdef _DEBUG
-#pragma comment(lib,"../Debug/hsocketd.lib")
+#ifdef _WIN64
+#pragma comment(lib,"../x64/Debug/hsocketd.lib")
 #else
-#pragma comment(lib,"..\\Release\\hsocket.lib")
+#pragma comment(lib,"../Debug/hsocketd.lib")
 #endif
+#else
+#ifdef _WIN64
+#pragma comment(lib,"../x64/Release/hsocket.lib")
+#else
+#pragma comment(lib,"../Release/hsocket.lib")
+#endif
+#endif
+
 
 int main()
 {
