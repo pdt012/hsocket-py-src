@@ -42,7 +42,7 @@ class HTcpSocket(socket.socket):
         else:
             return Message()
 
-    def sendFile(self, path: str, filename: str):
+    def sendFile(self, path: str, filename: str) -> bool:
         if not os.path.isfile(path):
             return False
         filesize = os.stat(path).st_size
@@ -54,10 +54,7 @@ class HTcpSocket(socket.socket):
                     if not data:
                         break
                     self.sendall(data)
-            # isblocking = self.getblocking()
-            # self.setblocking(True)  # 避免收不到file_ending_msg
             # file_ending_msg = self.recvMsg()
-            # self.setblocking(isblocking)
             # if file_ending_msg.isValid():
             #     received_filename = file_ending_msg.get("filename")
             #     received_filesize = file_ending_msg.get("size")
@@ -106,11 +103,8 @@ class HTcpSocket(socket.socket):
         return 0
 
     def recvFiles(self) -> Tuple[List[str], int]:
-        isblocking = self.getblocking()
-        self.setblocking(True)  # 避免收不到file_header_msg
         files_header_msg = self.recvMsg()
         if not files_header_msg.isValid():
-            self.setblocking(isblocking)
             return [], 0
         fileAmount = files_header_msg.get("count")
         filepaths = []
@@ -118,7 +112,6 @@ class HTcpSocket(socket.socket):
             filepath = self.recvFile()
             if filepath:
                 filepaths.append(filepath)
-        self.setblocking(isblocking)
         return filepaths, fileAmount
 
 

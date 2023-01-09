@@ -87,6 +87,38 @@ class HTcpServer:
     def remove(self, conn: "HTcpSocket"):
         self.__selector.remove(conn)
 
+    @staticmethod
+    def sendFile(self, conn: "HTcpSocket", path: str, filename: str) -> bool:
+        isblocking = conn.getblocking()
+        conn.setblocking(True)  # 避免引发BlockingError
+        ret = conn.sendFile(path, filename)
+        conn.setblocking(isblocking)
+        return ret
+
+    @staticmethod
+    def recvFile(self, conn: "HTcpSocket") -> str:
+        isblocking = conn.getblocking()
+        conn.setblocking(True)  # 避免引发BlockingError
+        ret = conn.recvFile()
+        conn.setblocking(isblocking)
+        return ret
+
+    @staticmethod
+    def sendFiles(self, conn: "HTcpSocket", paths: List[str], filenames: List[str]) -> int:
+        isblocking = conn.getblocking()
+        conn.setblocking(True)  # 避免引发BlockingError
+        ret = conn.sendFiles(paths, filenames)
+        conn.setblocking(isblocking)
+        return ret
+
+    @staticmethod
+    def recvFiles(self, conn: "HTcpSocket") -> Tuple[List[str], int]:
+        isblocking = conn.getblocking()
+        conn.setblocking(True)  # 避免引发BlockingError
+        ret = conn.recvFiles()
+        conn.setblocking(isblocking)
+        return ret
+
     @abstractmethod
     def _messageHandle(self, conn: "HTcpSocket", msg: "Message"):
         ...
