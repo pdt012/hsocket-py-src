@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Optional, Any
+from typing import Optional, Union, Any
 import json
 
 
@@ -9,6 +9,7 @@ class ContentType:
     HEADERONLY = 0x2  # 只含报头
     PLAINTEXT = 0x3  # 纯文本内容
     JSONOBJRCT = 0x4  # JSON对象
+    BINARY = 0x5  # 二进制串
 
 
 class MessageConfig:
@@ -33,7 +34,7 @@ class Header:
         return header
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> Optional["Message.Header"]:
+    def from_bytes(cls, data: bytes) -> Optional["Header"]:
         if len(data) != cls.HEADER_LENGTH:
             return None
         contenttype = int.from_bytes(data[0:2], 'little', signed=False)  # 报文内容码
@@ -44,24 +45,28 @@ class Header:
 
 
 class Message:
-    def __init__(self, contenttype=ContentType.NONE, opcode=0, statuscode=0, content: str = ""):
+    def __init__(self, contenttype=ContentType.NONE, opcode=0, statuscode=0, content: Union[str, bytes] = ""):
         self.__contenttype: int = contenttype  # 报文内容码
         self.__opcode: int = opcode  # 操作码
         self.__statuscode: int = statuscode  # 响应码
-        self.__content: str = ""
+        self.__content: Union[str, bytes] = ""
         self.__json: dict = {}
         
         if content:
             if contenttype == ContentType.HEADERONLY:
                 pass
-            elif contenttype == ContentType.PLAINTEXT:
+            elif contenttype == ContentType.PLAINTEXT and isinstance(content, str):
                 self.__content = content
-            elif contenttype == ContentType.JSONOBJRCT:
+            elif contenttype == ContentType.JSONOBJRCT and isinstance(content, str):
                 self.__content = content
                 self.__json = json.loads(content)
+            elif contenttype == ContentType.BINARY and isinstance(content, bytes):
+                self.__content = content
+            else:
+                raise ValueError()
     
     @classmethod
-    def HeaderContent(cls, header: Header, content: str) -> "Message":
+    def HeaderContent(cls, header: Header, content: Union[str, bytes]) -> "Message":
         if header == None:
             return Message()
         msg = Message(header.contenttype, header.opcode, header.statuscode, content)
@@ -88,6 +93,12 @@ class Message:
                 msg.__json[key] = kw[key]
         return msg
 
+    @classmethod
+    def BinaryMsg(cls, opcode=0, statuscode=0, content: bytes = b""):
+        msg = Message(ContentType.BINARY, opcode, statuscode)
+        msg.__content = content
+        return msg
+
     def isValid(self):
         return self.__contenttype != ContentType.NONE and self.__contenttype != ContentType.ERROR_
 
@@ -95,7 +106,7 @@ class Message:
         ret = self.__json.get(key)
         return ret
 
-    def content(self) -> str:
+    def content(self) -> Union[str, bytes]:
         return self.__content
 
     def contenttype(self) -> int:
@@ -113,12 +124,14 @@ class Message:
     def to_bytes(self) -> bytes:
         if self.__contenttype == ContentType.HEADERONLY:
             content = b""
-        elif self.__contenttype == ContentType.PLAINTEXT:
+        elif self.__contenttype == ContentType.PLAINTEXT and isinstance(self.__content, str):
             content = self.__content.encode(MessageConfig.ENCODING)
-        elif self.__contenttype == ContentType.JSONOBJRCT:
+        elif self.__contenttype == ContentType.JSONOBJRCT and isinstance(self.__content, str):
             content = json.dumps(self.__json).encode(MessageConfig.ENCODING)
+        elif self.__contenttype == ContentType.BINARY and isinstance(self.__content, bytes):
+            content = self.__content
         else:
-            content = self.__content.encode(MessageConfig.ENCODING)
+            raise ValueError()
         length = len(content)  # 数据包长度(不包含报头)
         header = Header(self.__contenttype, self.__opcode, self.__statuscode, length)
         return header.to_bytes() + content
@@ -130,7 +143,10 @@ class Message:
         header = Header.from_bytes(data[0:Header.HEADER_LENGTH])
         if header == None:
             return Message()
-        msg = Message.HeaderContent(header, data[Header.HEADER_LENGTH:].decode(MessageConfig.ENCODING))
+        if header.contenttype == ContentType.BINARY:
+            msg = Message.HeaderContent(header, data[Header.HEADER_LENGTH:])
+        else:
+            msg = Message.HeaderContent(header, data[Header.HEADER_LENGTH:].decode(MessageConfig.ENCODING))
         return msg
 
     def __str__(self):
